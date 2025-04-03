@@ -33,3 +33,5 @@ presentation/*.run.xml
 presentation/*.synctex
 presentation/*.nav
 presentation/*.snm
+
+code/.ipynb_checkpoints/
