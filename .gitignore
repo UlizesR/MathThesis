@@ -19,6 +19,13 @@ Thesis/**/*.nav
 Thesis/**/*.snm
 Thesis/**/*.vrb
 
+Thesis/old/
+Thesis/ver6/*
+
+Thesis/ver7/images
+
+references/
+
 presentation/*.aux
 presentation/*.bbl
 presentation/*.blg
