@@ -87,12 +87,23 @@
 \newpage
 
 \begin{abstract}
-    
+	This thesis develops a unified framework for geodesic analysis on smooth surfaces in \(\R^3\) and in the Schwarzschild spacetime, showing how continuous symmetries give rise to conserved quantities via Killing vector fields and Noether’s theorem.  
+	We derive the general geodesic equations, specialize to surfaces of revolution to obtain Clairaut’s relation with concrete examples, and present practical methods for identifying and exploiting isometries.  
+	Applying these techniques to the Schwarzschild metric, we obtain the effective potential for null and time-like geodesics and characterize circular orbits and the photon sphere.
 \end{abstract}
 
 \section{Introduction}
+Geodesics—curves that locally minimize distance or more accurate, the "straightest" line in a curved surface, play a fundamental role in both theoretical and applied contexts.  
+On the Earth’s surface, they describe great‐circle routes used in air and sea navigation, enabling efficient path planning across long distances.  
+In computer graphics and mesh processing, geodesic computations underpin texture mapping, shape interpolation, and shortest‐path queries on complex surfaces.  
+In robotics, geodesic algorithms guide motion planning over uneven terrains and within configuration spaces to avoid obstacles while minimizing energy or time.
 
-% \raggedright
+Beyond these engineering applications, geodesics are central to our understanding of gravity in Einstein’s theory of general relativity.  
+Free‐falling particles and light rays follow spacetime geodesics, so that phenomena such as gravitational lensing, perihelion precession, and black‐hole photon spheres can be analyzed through purely geometric methods.  
+This deep connection between curvature and motion has inspired techniques ranging from GPS corrections in satellite orbits to simulations of cosmological structure formation.
+
+Motivated by this wide-ranging importance, the present thesis develops a systematic framework for deriving and solving geodesic equations on smooth surfaces in \(\R^3\) and on the Schwarzschild spacetime.  
+By identifying continuous symmetries and their associated Killing vector fields, we obtain conserved quantities that greatly simplify both theoretical analysis and numerical implementation.  The methods presented here provide a unified toolkit for applications in geodesy, graphics, robotics, and gravitational physics.
 
 \section{Background and Preliminaries}
 
@@ -206,8 +217,6 @@ A curve $\gamma(t)$ on $\mathcal{S}$ is \emph{unit speed} (or parametrized by ar
 
 Under this condition, the parameter $t$ itself represents the arc length along the curve. 
 
-\begingroup 
-\color{blue}
 
 \subsection{Arc Length Reparametrization}
 Any regular curve $\gamma(t)$ can be reparametrized to have unit speed (except at points where $\dot\gamma=0$). 
@@ -239,6 +248,10 @@ Taking the norm of both sides,
 \left\|\dv{s}\beta(s)\right\| = \left\|\gamma'(t(s)) \cdot \frac{1}{\|\gamma'(t(s))\|}\right\| = \frac{\|\gamma'(t(s))\|}{\|\gamma'(t(s))\|} = 1.
 \]
 Therefore, all curves can be reparameterized to have unit speed.
+
+Under arc length reparametrization, we call $s$ the \emph{arc length parameter} or \emph{proper time} in the context of general relativity.
+This parameter is usually refered as the \emph{affine parameter} in the context of geodesics, as it is a parameter that preserves the affine structure of the curve.
+Affine parameters are exactly those parameters for which the geodesic equation has no extra “forcing” term.
 
 \subsection{Curvature of curves}
 The curvature of a curve is a measure of how much the curve deviates from being a straight line.
@@ -357,7 +370,7 @@ In our case of equations (\ref{eq:geodesic-uv}) and (\ref{eq:geodesic-vu}), we h
     \Gamma_{11}^{2} &= -\frac{E_{v}}{2G} &\quad \Gamma_{12}^{2} &= \Gamma_{21}^{2} = \frac{G_{u}}{2G} &\quad \Gamma_{22}^{2} &= -\frac{G_{v}}{2G}.
 \end{aligned}
 \]
-\endgroup
+
 \section{Geodesics on Surfaces}
 
 \subsection{Geodesics on Surfaces of Revolution}
@@ -479,27 +492,49 @@ Thus, the geodesic equations reduce to
 	\ddot{v} - 2\frac{x_{u}}{x}\dot{u}\dot{v} &= 0 \label{eq:geodesic-v-arc}
 \end{align}
 
-\subsection{General Geodesics}
+Looking at the metric for a unit speed curve, we have
+\[
+	ds^{2} = du^{2} + x(u)^{2}dv^{2} 
+\]
+We then have the following must hold for a unit speed curve:
+\begin{equation}\label{eq:unit-speed-condition}
+	1 = \left(\dv{u}{s}\right)^{2} + x(u)^{2}\left(\dv{v}{s}\right)^{2} 
+\end{equation}
+This means that the geodesic equations are not independent of the unit speed condition, and thus we must solve them simultaneously.
+
+\begingroup 
+\color{blue}
+\subsection{General Geodesics}\label{sec:general-geodesics}
 We can extrapolate some general geodesics in surfaces of revolution by keeping one of the coordinates constant.
 With this, we will find two types of geodesics: the \emph{meridian geodesic} and the \emph{parallel geodesic}.
 
 Meridian geodesics are geodesics that run along the longitude (top to bottom) of the surface.
-To find the meridian geodesics, we set $u = \text{const}$, which means that $v$ is the only variable that changes.
-Thus, we have that $\dot{u} = 0$ and $\ddot{u} = 0$, so we can substitute these values into the geodesic equations \eqref{eq:geodesic-u-arc} and \eqref{eq:geodesic-v-arc} to get
-\begin{align*}
-	x x_{u}\,\dot{v}^{2} &= 0\\
-	\ddot{v} &= 0 
-\end{align*}
+To find the meridian geodesics, we set $v = \text{const}$, which means $\dot{v} = \ddot{v} = 0$.
+This means that $u$ is the only variable that changes and thus it corresponds to the profile curve of the surface.
+Substituting this into the \eqref{eq:geodesic-u-arc} gives us:
+\[
+	\ddot{u} = 0 \implies u(t) = u_0 + \dot{u}_0 t
+\]
+where \(u_0\) is the initial position of the geodesic and \(\dot{u}_0\) is the initial velocity of the geodesic.
+This means that the geodesics along the meridian are straight lines in the \(u\) direction, which is the same as the profile curve of the surface.
 
-Because $v$ is not constant, we have that $\dot{v} \neq 0$, so the first equation gives us that $x x_{u} = 0$.
-This means that $x = 0$ or $x_{u} = 0$.
+Parallel geodesics are geodesics that run along the latitude (left to right) of the surface.
+To find the parallel geodesics, we set $u = \text{const}$, which means $\dot{u} = \ddot{u} = 0$.
+This means that $v$ is the only variable that changes and thus it corresponds to the angle of rotation about the $z$-axis.
+Substituting this into the \eqref{eq:geodesic-v-arc} gives us:
+\[
+	x \, x_{u} \, \ddot{v} = 0 
+\]
+Because of the unit speed condition, we have that \(\dot{v} = 1 \) and by equation \eqref{eq:unit-speed-condition}, we have that $x(u)\dot{u} = 1$, thus $x \neq 0$.
+Therefore, at $u_0$, we have that $x_{u} = 0$. 
+This means that parallels are only geodesics if $u_0$ is a critical point of the profile curve, i.e., $x_{u}(u_0) = 0$.
+\endgroup
 
-\begingroup 
-\color{blue}
-\subsubsection{Clairaut’s Relation}
+\subsubsection{Clairaut’s Relation and Parametrization}
 
 Equations \eqref{eq:geodesic-u} and \eqref{eq:geodesic-v} can be difficult to solve directly.
 However, we can use a special property of surfaces of revolution to simplify the problem.
+We will come to see that geodesics have a conserved quantity along the geodesic.
 
 We begin by solving equation (\ref{eq:geodesic-v-arc}) for \(v\):
 \[
@@ -530,8 +565,7 @@ Using the angle \(\frac{\pi}{2} - \phi\) between the tangent vector and the norm
 R\cos(\frac{\pi}{2} - \phi) = R\sin(\phi) = C
 \]
 
-There is a well-known relation called Clairaut's relation that relates the angle of the geodesic with respect to the axis of revolution and the distance from the axis of revolution.
-\endgroup 
+This is a well-known relation called Clairaut's relation that relates the angle of the geodesic with respect to the axis of revolution and the distance from the axis of revolution.
 
 \begin{theorem}[Clairaut's Relation]
 Let \(S\) be a surface of revolution, then along any geodesic on \(S\), the following relation holds:
@@ -561,9 +595,9 @@ So Clairaut's relation can be written as
 \begin{equation} \label{eq:Clairaut_relation_u}
     x(u) \sin(\phi) = \sqrt{G} \sin(\phi) = C
 \end{equation}
-The geodesic equations for a surface of revolution parametrized by \eqref{eq:param-rev} are given by the $u$-Clairaut equations \eqref{eq:u_Clairaut_geodesic_1} and \eqref{eq:u_Clairaut_geodesic_2}.
+The geodesic equations for a surface of revolution parametrized by equation \eqref{eq:param-rev} are given by the $u$-Clairaut equations \eqref{eq:u_Clairaut_geodesic_1} and \eqref{eq:u_Clairaut_geodesic_2}.
 
-Solving \eqref{eq:u_Clairaut_geodesic_2} gives us
+Solving equation \eqref{eq:u_Clairaut_geodesic_2} gives us
 \begin{align*}
     \frac{\ddot{v}}{\dot{v}} &= -\frac{G_{u}}{G}\dot{u} \\
     \int \frac{\ddot{v}}{\dot{v}} \dd{t} &= -\int \frac{G_{u}}{G}\dot{u} \dd{t} \\
@@ -590,7 +624,7 @@ Integrating this expression gives us
 
 which serves to characterize geodesics for a $u$-Clairaut parametrization
 
-Similarly, we can also derive the solutions for a $v$-Clairaut parametrization as done in \cite{oprea2007differentialdifferential},\cite{rigatti2023characterizing},\cite{ramirez2001geodesics}.
+Similarly, we can also derive the solutions for a $v$-Clairaut parametrization as done in \cite{oprea2007differential} and \cite{rigatti2023characterizing}.
 This results in the following geodesic solution:
 \begin{equation} \label{eq:u_Clairaut_integral}
 	u = \pm \int \frac{c\sqrt{G}}{\sqrt{E}\sqrt{E - c^{2}}} \dd{v}
@@ -600,7 +634,8 @@ This results in the following geodesic solution:
 \subsection{Geodesics on different surfaces}
 
 \subsubsection{The Cylinder}
-The cylinder is a surface of revolution obtained by rotating a line about an axis.
+We begin by looking at a simple case of a surface of revolution, the cylinder.
+The cylinder denoted topologically by \(S^1 \times \mathbb{R}\) is a surface generated by rotating a line about the \(z\)-axis.
 The parametric representation of the cylinder is given by
 \[
 	\mathbf{r}(u, v) = \begin{bmatrix} R \cos (u) \\ R \sin (u) \\ v \end{bmatrix},
@@ -610,7 +645,7 @@ The tangent vectors are given by
 \[
 	\mathbf{r}_u = \begin{bmatrix} -R \sin (u) \\ R \cos (u) \\ 0 \end{bmatrix}, \quad \mathbf{r}_v = \begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix}.
 \]
-The metric tensor for the cylinder is given by
+The metric for the cylinder is given by
 \[
 	ds^2 = R^2 du^2 + dv^2,
 \]
@@ -622,7 +657,7 @@ Thus the geodesic equations for the cylinder are given by
 \end{align*}
 
 In this case, the geodesics are very straightforward to solve.
-We simply integrate them twice to get
+Since the second derivatives are 0, we can easily determine the first derivatives to be constants and the position to be linear functions of time.
 \begin{align*}
 	u(t) &= a + b t \\
 	v(t) &= c + d t
@@ -643,16 +678,8 @@ If \(b \neq 0\), we have a helical geodesic that wraps around the cylinder as it
 	% Subfigure 1: Vertical Line on the Cylinder
 	\begin{subfigure}[b]{0.3\linewidth}
 	  \centering
-	  \begin{tikzpicture}[scale=1.2]
-		\drawAxes
-		\drawCylinder
-		% Draw a vertical line on the cylinder.
-		% Using an angular coordinate fixed at -5*pi/3.
-		\draw[thick,red,opacity=0.75]
-		  ({\radio*cos(-5*pi/3 r)}, 0, {\radio*sin(-5*pi/3 r)}) --
-		  ({\radio*cos(-5*pi/3 r)}, \dominio, {\radio*sin(-5*pi/3 r)});
-	  \end{tikzpicture}
-	  \caption{Vertical Line: case $b=0$}
+	  \includegraphics[width=0.9\textwidth]{images/cylinder_line.png}
+ 	  \caption{Vertical Line: case $b=0$}
 	  \label{subfig:vertical}
 	\end{subfigure}
 	\hfill
@@ -660,18 +687,7 @@ If \(b \neq 0\), we have a helical geodesic that wraps around the cylinder as it
 	% Subfigure 2: Helix on the Cylinder
 	\begin{subfigure}[b]{0.3\linewidth}
 	  \centering
-	  \begin{tikzpicture}[scale=1.2]
-		\drawAxes
-		\drawCylinder
-		% Draw a helix with 2 full rotations (t from 0 to 4*pi) along the cylinder.
-		\draw[thick,red,opacity=0.75]
-		  plot[domain=0:4*pi, smooth, variable=\t]
-		  (
-			{\radio*cos(\t r)},
-			{(\dominio/(4*pi))*\t},
-			{\radio*sin(\t r)}
-		  );
-	  \end{tikzpicture}
+	  \includegraphics[width=0.9\textwidth]{images/cylinder_helix.png}
 	  \caption{Helix: case $b\neq 0$}
 	  \label{subfig:helix}
 	\end{subfigure}
@@ -680,16 +696,7 @@ If \(b \neq 0\), we have a helical geodesic that wraps around the cylinder as it
 	% Subfigure 3: Horizontal Circle on the Cylinder
 	\begin{subfigure}[b]{0.3\linewidth}
 	  \centering
-	  \begin{tikzpicture}[scale=1.2]
-		\drawAxes
-		\drawCylinder
-		% Set the fixed z-coordinate for the circle at mid-height.
-		\pgfmathsetmacro{\fixedz}{\dominio/2}
-		% Draw the horizontal circle at z = \fixedz.
-		\draw[thick,red,opacity=0.75]
-		  plot[domain=0:2*pi, smooth, variable=\t]
-		  ({\radio*cos(\t r)}, {\fixedz}, {\radio*sin(\t r)});
-	  \end{tikzpicture}
+	  \includegraphics[width=0.9\textwidth]{images/cylinder_circle.png}
 	  \caption{Circle: case $c=0$}
 	  \label{subfig:circle}
 	\end{subfigure}
@@ -700,6 +707,7 @@ If \(b \neq 0\), we have a helical geodesic that wraps around the cylinder as it
   
 \subsubsection{The Sphere}
 
+We now consider the case of a sphere, which is a special case of a surface of revolution.
 The sphere is a surface of revolution obtained by rotating a circle about an axis.
 The parametric representation of the sphere is given by
 \[
@@ -710,26 +718,28 @@ The tangent vectors are given by
 \[
     \mathbf{r}_u = \begin{bmatrix} -R \sin (u) \cos (v) \\ -R \sin (u) \sin (v) \\ R \cos (u) \end{bmatrix}, \quad \mathbf{r}_v = \begin{bmatrix} -R \cos (u) \sin (v) \\ R \cos (u) \cos (v) \\ 0 \end{bmatrix}.
 \]
-The metric tensor for the sphere is given by
+The metric for the sphere is given by
 \[
     ds^2 = R^2 du^2 + R^2 \sin^2 (u) dv^2,
 \]
-Where \(E = R^2 \), \(F = 0\), and \(G = R^2 \sin^2 (u)\).
+Where the components of the metric tensor are given by \(E = R^2 \), \(F = 0\), and \(G = R^2 \sin^2 (u)\).
 Thus the geodesic equations for the sphere are given by
 \begin{align*}
     \ddot{u} + \sin(v) \cos(v) \dot{v}^2 &= 0 \\
     \ddot{v} + 2\tan(v) \dot{u} \dot{v} &= 0 
 \end{align*}
-
 The resulting system is a highly complex set of nonlinear differential equations, and in practice, geodesic equations are seldom solved directly.
 
+This is where Clairaut's relation comes in handy.
 We can use Clairaut's relation to simplify the geodesic equations.
-Using Eq \eqref{eq:v_Clairaut_integral}, we get 
+We see that taking the derivatives of the metric tensor components with respect to \(v\) we have $E_v = 0$ and $G_v = 0$ which means that the sphere is a $u$-Clairaut parametrization.
+Using Eq \eqref{eq:v_Clairaut_integral}, we get the following integral:
 \[
     v = \pm \int \frac{c}{\sin(u)\sqrt{R^2\sin^{2}(u) - c^{2}}} \dd{u}
 \]
-These steps will be left out as they are not needed to understand the geodesic equations and are somewhat tedious. 
+We wont show the steps to solve this integral, as it is a bit tedious and not needed to understand the geodesic equations.
 They can be found in full in \cite{oprea2007differential}, (Note: \cite{oprea2007differential} uses $v$-Clairaut parametrization, so the integration steps will slightly differ).
+The solution to this integral is given by 
 \[
 \sin(v - d) = \lambda \cot(u)
 \]
@@ -739,15 +749,23 @@ Using the trigonometric identity \(\sin(v - d) = \sin(v)\cos(d) - \cos(v)\sin(d)
 \[
     \frac{\sin(v)\sin(u)}{\sin(u)}\cos(d) - \frac{\cos(v)\sin(u)}{\sin(u)}\sin(d) - \lambda \frac{\cos(u)}{\sin(u)} = 0
 \]
-If we substitution \(x = \cos(v)\sin(u), \quad y = \sin(v)\sin(u), \quad z = \cos(u)\), we can rewrite the equation as
+If we substitute \(x = \cos(v)\sin(u), \quad y = \sin(v)\sin(u), \quad z = \cos(u)\), we can rewrite the equation as
 \[
     y\cos(d) - x\sin(d) - \lambda z = 0
 \]
 Hence, the geodesic equations imply that the geodesics on the sphere lie on a plane \( ax + by + cz = d \) that passes through the origin.
-So the geodesics on the sphere are great circles.
+So the geodesics on the sphere are great circles. Figure (\ref{fig:geodesics-on-sphere}) shows the geodesics on a sphere.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.4\textwidth]{images/sphere_circle_plane.png}
+	\caption{Geodesics on a Sphere}
+	\label{fig:geodesics-on-sphere}
+\end{figure}
 
 \subsubsection{The Hyperboloid}
 
+Now we consider the case of a hyperboloid, which is a bit more complex to study than the sphere.
 The hyperboloid is a surface of revolution obtained by rotating a hyperbola about an axis.
 The parametric representation of the hyperboloid (also called a ”Hyperboloid of one sheet”) is given by
 \[
@@ -775,15 +793,17 @@ So the geodesic equations for the hyperboloid are given by
     \ddot{v} + \tanh(u) \dot{u} \dot{v} &= 0
 \end{align*}
 Using Clairaut's relation, we can simplify the geodesic equations.
+Since $E_v = 0$ and $G_v = 0$, we have a $u$-Clairaut parametrization for the hyperboloid.
 Using Eq \eqref{eq:v_Clairaut_integral}, we get
 \[
     v = \pm \int \frac{c\sqrt{(a^2 + b^2)\sinh^2(u) + b^2}}{a\cosh(u)\sqrt{a^2\cosh^2(u) - c^2}}\,\dd{u}
 \]
-We use Clairaut's relation to analyze the geodesics on the hyperboloid.
+Obviously, this integral is not trivial to solve, but we can use Clairaut's relation to analyze the geodesics on the hyperboloid.
+We have that Clairaut's relation for the hyperboloid is given by
 \[
     a \cosh(u) \sin(\phi) = C  
 \]
-By assuming that $u$ is very small number, therefore we will consider into 3 cases:
+As shown in \cite{khuangsatung2012geodesics}, by assuming that $u$ is very small number, we can consider the following cases:
 \begin{itemize}
     \item If $C = 0$, then $\phi = 0$ and the geodesic corresponds to a meridian on the hyperboloid.
     \item If $C = a$ at $u = u_0 = 0$, then $\phi = \frac{\pi}{2}$ and the geodesic a parallel on the hyperboloid.
@@ -906,8 +926,6 @@ For example, on a round sphere the full isometry group is the orthogonal group $
 It is important to note that isometries preserve geodesics; if $\gamma$ is a geodesic on $S$, then so is $f\circ\gamma$. 
 This property will be key when we introduce the infinitesimal generators of continuous isometries.
 
-\begingroup
-\color{blue}
 
 \subsection{Killing Vector Fields}
 A Killing vector field is a vector field on a manifold that generates an isometry of the metric.
@@ -954,7 +972,55 @@ Additionally, we have another constant for the motion along the geodesic, which 
 \end{equation}
 In the context of general relativity, this equation describes the motion of a test particle in a gravitational field where \(\epsilon = 0\) for null geodesics, \(\epsilon = 1\) for time-like geodesics, and \(\epsilon = -1\) for space-like geodesics.
 
-.
+\subsection{Clairaut's Relation from Killing Vector Fields}
+
+Consider a surface of revolution obtained by rotating a profile curve around an axis, with local coordinates $(u,v)$ so that the induced metric reads
+$$
+ds^2 \;=\; du^2 \;+\; f(u)^2\,dv^2\,,
+$$
+where $f(u)$ is the distance from the axis.
+
+Because the metric coefficients do not depend on $v$, the vector field
+
+$$
+K = \frac{\partial}{\partial v}
+$$
+
+is Killing (it generates rotations about the axis).
+
+Applying the general conservation law $g(K,\dot x)=\text{const}$ gives
+
+$$
+g\bigl(\dot x,\partial_v\bigr)
+= f(u)^2\,\frac{dv}{d\lambda}
+= L,
+$$
+where $L$ is the conserved “angular momentum.”
+
+For a unit-speed geodesic one has
+
+$$
+\underbrace{\Bigl(\frac{du}{d\lambda}\Bigr)^2}_{=\,(\cos\psi)^2}
+\;+\;
+\underbrace{f(u)^2\Bigl(\frac{dv}{d\lambda}\Bigr)^2}_{=\,(\sin\psi)^2}
+=1,
+$$
+
+so we define the angle $\psi$ between the geodesic and a meridian by
+
+$$
+\cos\psi = \frac{du}{d\lambda},
+\qquad
+\sin\psi = f(u)\,\frac{dv}{d\lambda}.
+$$
+
+Hence
+$$
+f(u)\,\sin\psi
+= f(u)\;f(u)\,\frac{dv}{d\lambda}
+= L,
+$$
+
 \subsection{Noether's Theorem}
 Noether's theorem reveals that every continuous symmetry of the action leads to a conserved quantity. 
 In a system described by a Lagrangian \( \mathcal{L} \), if the action is invariant under a continuous transformation, then there exists a corresponding conserved current.
@@ -1103,7 +1169,6 @@ The unstable solution is given by
 	r_{c} = \frac{L^{2} - \sqrt{L^{4} - 12GM L^{2}}}{2GM}
 \]
 The stable solution corresponds to a circular orbit that is stable under small perturbations, while the unstable solution corresponds to a circular orbit that is unstable under small perturbations.
-\endgroup
 
 % \color{black}
 \section{Conclusion}

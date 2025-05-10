@@ -1,0 +1,294 @@
+% Beamer presentation
+\documentclass{beamer}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{physics}
+
+\usetheme{Madrid}
+\useoutertheme{miniframes}
+\useinnertheme{circles}
+
+\definecolor{UBCblue}{rgb}{0.04706, 0.13725, 0.26667} % UBC Blue (primary)
+\usecolortheme[named=UBCblue]{structure}
+
+\newcommand{\R}{\mathbb{R}}
+
+\begin{document}
+
+\begin{frame}
+	\title{A look at geodesics through symmetries and their applications}
+	\author{Uli Raudales}
+	\date{\today}
+	\titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+  	\tableofcontents
+\end{frame}
+
+\section{Preliminaries}
+\begin{frame}{Preliminaries}
+	\footnotesize
+	\begin{itemize}
+		\item \textbf{Differential geometry:} Study of smooth topological spaces called \emph{manifolds} using tools from calculus and linear algebra.
+	\end{itemize}
+\end{frame}
+
+\section{Surfaces and Curves}
+\begin{frame}{Surfaces}
+	% \footnotesize
+	\begin{definition}[Surface]\label{def:surface}
+		A regular surface $\mathcal{S}\subset\R^3$ is the image of a one-to-one smooth map
+		\[
+			\mathbf{r}: U\subset\R^2 \to \R^3,\quad
+			\mathbf{r}(u,v) = \bigl\langle x(u,v),\,y(u,v),\,z(u,v)\bigr\rangle,
+		\]
+		such that $\mathbf{r}_u \times \mathbf{r}_v \neq \mathbf{0} \quad\text{for all }(u,v)\in U $.
+	\end{definition}
+	\hfill
+	\vspace{1ex}
+	\begin{itemize}[<+->]
+		\item A surface is a 2D manifold embedded in $\R^3$, locally resembling $\R^2$.
+		\item We write $\mathbf{r}_u = \frac{\partial\mathbf{r}}{\partial u}\big|_{(u_0,v_0)}$ and $\mathbf{r}_v = \frac{\partial\mathbf{r}}{\partial v}\big|_{(u_0,v_0)}$ for the tangent vectors at a point $\mathbf{r}(u_0,v_0)$.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{The Metric}
+	% \footnotesize
+	\begin{definition}[Metric]\label{def:metric}
+		A \emph{metric} on a surface $\mathcal{S}$ is a is a smoothly varying inner product on the tangent plane at each point of the surface.
+		\[
+			ds^2 = E\,du^2 + 2F\,du\,dv + G\,dv^2,
+		\]
+		where $E = \mathbf{r}_u\cdot\mathbf{r}_u$, $F = \mathbf{r}_u\cdot\mathbf{r}_v$, and $G = \mathbf{r}_v\cdot\mathbf{r}_v$.
+	\end{definition}
+	\hfill 
+	\pause 
+	\begin{itemize}[<+->]
+		\item The metric defines lengths, angles, and areas on the surface.
+		\item The coefficients $E$, $F$, and $G$ are called the \emph{first fundamental form} of the surface often characterized as:
+		\[
+			g_{\mu\nu} = \mathbf{r}_\mu \cdot \mathbf{r}_\nu =
+			\begin{bmatrix}
+				E & F \\
+				F & G
+			\end{bmatrix} 
+		\] 
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Curves}
+	% \footnotesize
+	\begin{definition}[Curve]\label{def:curve}
+		A \emph{curve} $\gamma$ on a surface $\mathcal{S}$ is a smooth map $\gamma: I \to \mathcal{S}$, where $I$ is an interval in $\R$.
+		\[
+		    \gamma(t) = \mathbf{r}(u(t),v(t))
+		\]
+	\end{definition}
+	\vspace{1ex}
+	\begin{itemize}[<+->]
+		\item $\dot{\gamma}(t) = \frac{d\gamma}{dt} = \dot{u}(t)\mathbf{r}_u  + \dot{v}(t)\mathbf{r}_v$
+		\item $\ddot{\gamma}(t) = \dv[2]{\gamma}{t} = \dot{u}(t)^{2}\mathbf{r}_{uu} + \dot{v}(t)^{2}\mathbf{r}_{vv} + 2\dot{u}(t)\dot{v}(t)\mathbf{r}_{uv} + \ddot{u}\mathbf{r}_{u} + \ddot{v}\mathbf{r}_{v}.$
+		\item \textbf{Unit Speed Condition:} Under arc length re-parametrization, $\|\dot{\gamma}(t)\| = 1$.
+		% \item<4-> \textbf{Curvature:} $\kappa_{\gamma}(t) = \frac{\|\ddot{\gamma}(t)\|}{\|\dot{\gamma}(t)\|^3} \implies \|\ddot{\gamma}(t)\|$.
+		% \item<5-> \textbf{Normal Curvature:} $\kappa_{\mathbf{N}}(t) = \kappa_{\gamma}(t) \cdot \mathbf{N}(t)$, where $\mathbf{N}(t)$ is the unit normal vector to the surface at $\gamma(t)$.
+	\end{itemize}	
+\end{frame}
+
+\begin{frame}{Curvature}
+	% \footnotesize
+	\begin{definition}[Curvature]\label{def:curvature}
+		The \emph{curvature} of a curve defines how much the curve deviates from being a straight line.
+		\[
+			\kappa_{\gamma}(t) = \frac{\|\dot{\gamma}(t) \times \ddot{\gamma}(t)\|}{\|\dot{\gamma}(t)\|^3} \implies \|\ddot{\gamma}(t)\|
+		\]
+	\end{definition}
+	\vspace{1ex}
+	\begin{itemize}[<+->]
+		\item \textbf{Normal Curvature:} $\kappa_{\mathbf{N}}(t) = \kappa_{\gamma}(t) \cdot \mathbf{N}(t)$, where $\mathbf{N}(t)$ is the unit normal vector to the surface at $\gamma(t)$.
+		\item \textbf{Geodesic Curvature:} $\kappa_{g}(t) = \kappa_{\gamma}(t) - \kappa_{\mathbf{N}}(t)$, which measures the curvature of the curve relative to the surface.
+	\end{itemize}
+\end{frame}
+
+\section{Geodesics}
+\begin{frame}{Geodesics}
+	\footnotesize
+	\begin{definition}[Geodesic]\label{def:geodesic}
+		A \emph{geodesic} is a curve $\gamma$ on a surface $\mathcal{S}$ that has zero geodesic curvature.
+		\[
+			\kappa_{g}(t) = 0
+		\]
+	\end{definition}
+	\vspace{1ex}
+	\begin{itemize}[<+->]
+		\item Geodesics are the "straightest" paths on a curved surface.
+		\item Often, geodesics can be considered as the shortest paths between two points on the surface.
+		\item Geodesics are described by the geodesic equation:
+		\[
+		    \dv[2]{q^\sigma}{t} + \sum_{\mu,\nu=1}^{n} \Gamma_{\mu\nu}^\sigma \dv{q^\mu}{t} \dv{q^\nu}{t} = 0 \qquad \Gamma_{\mu\nu}^\sigma = \frac{1}{2}\sum_{\lambda=1}^{n}g^{\sigma\lambda}\left(\pdv{g_{\mu\nu}}{q^\lambda} + \pdv{g_{\nu\lambda}}{q^\mu} - \pdv{g_{\mu\lambda}}{q^\nu}\right)
+		\]
+		where $\Gamma_{\mu\nu}^\sigma$ are the Christoffel symbols of the second kind, describing how the coordinate system curves.
+	\end{itemize}
+\end{frame}
+
+\section{A Look at Surfaces of Revolution}
+\begin{frame}{Surfaces of Revolution}
+	\footnotesize
+	\begin{definition}[Surface of Revolution]\label{def:surface_of_revolution}
+		A \emph{surface of revolution} is a surface generated by rotating a curve $\gamma$ about an axis. Under rotation about the $z$-axis, the surface can be described as:
+		\[
+			\mathcal{S} = \mathbf{r}(u,v) = \bigl\langle x(u)\cos(v),\,x(u)\sin(v),\,z(u)\bigr\rangle \qquad u\in I,\,v\in [0,2\pi]
+		\]
+	\end{definition}
+	\vspace{1ex}
+	\begin{itemize}[<+->]
+		\item Surfaces of revolution are characterized by their symmetry about an axis.
+		\item The metric on a surface of revolution is given by:	
+		\[
+		    ds^{2} \;=\; \big(x_{u}^{2} + z_{u}^{2}\big)\,du^{2} + x(u)^{2}\,dv^{2} \implies du^{2} + x(u)^{2}dv^{2} 
+		\]
+		\item By the unit speed condition, the following equation hold:
+		\[
+			1 = \left(\dv{u}{t}\right)^{2} + x(u)^{2}\left(\dv{v}{t}\right)^{2}
+		\]
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Geodesics on Surfaces of Revolution}
+	\footnotesize
+	\begin{itemize}[<+->]
+		\item The geodesic equation for a surface where $F = 0$ is given by:
+		\[
+			\ddot{u} + \frac{E_{u}}{2E}\dot{u}^{2} + 2\frac{E_{v}}{2E}\dot{u}\dot{v} - \frac{G_{u}}{2E}\dot{v}^{2} = 0
+		\]
+		\[
+			\ddot{v} - \frac{E_{v}}{2G}\dot{u}^{2} + 2\frac{G_{u}}{2G}\dot{u}\dot{v} + \frac{G_{v}}{2G}\dot{v}^{2} = 0
+		\]
+		Where $E_{u} = \pdv{E}{u}$, $E_{v} = \pdv{E}{v}$, $G_{u} = \pdv{G}{u}$, and $G_{v} = \pdv{G}{v}$.
+		\item This corresponds to the geodesic equations for a surface of revolution:
+	\end{itemize}
+	\begin{align*}
+		\ddot{u} + \frac{x_{u}x_{uu} + z_{u}z_{uu}}{ x_{u}^{2} + z_{u}^{2}}\,\dot{u}^2 - \frac{x x_{u}}{x_{u}^{2} + z_{u}^{2}}\,\dot{v}^{2} = 0 &\implies \ddot{u} - x x_{u}\,\dot{v}^{2} = 0 \\
+		\ddot{v} - 2\frac{x_{u}}{x}\dot{u}\dot{v} = 0 &\implies \ddot{v} - 2\frac{x_{u}}{x}\dot{u}\dot{v} = 0
+	\end{align*}
+\end{frame} 
+% 	\begin{itemize}[<+->]
+% 	% \item For when $v = v_0$ is constant, meridians (lines of longitude) are geodesics
+% 	% \[
+% 	% 	\ddot{u} = 0 \implies u(t) = u_0 + \dot{u}_0 t
+% 	% \]
+% 	% \item For when $u = u_0$ is constant, parallels (lines of latitude) are geodesics iff $x(u_0) = 0$
+% 	% \[
+% 	% 	x \, x_{u} \, \dot{v} = 0 
+% 	% \]
+% \end{itemize}
+
+
+\section{Symmetries \& Killing Fields}
+\begin{frame}{Symmetries \& Isometries}
+	\begin{definition}[Symmetry]
+		A \emph{symmetry} of a surface $\mathcal{S}$ is a diffeomorphism $\phi: \mathcal{S} \to \mathcal{S}$ that preserves the structure of the surface.
+		They are actions/transformations that leave the surface unchanged.
+	\end{definition}
+	\vspace{1ex}
+	\pause 
+	\begin{definition}[Isometry]
+		An \emph{isometry} is a symmetry that preserves the metric, that is, it preserves lengths and angles:
+		\[
+			g(\phi(p), \phi(q)) = g(p, q)
+		\]
+	\end{definition}
+\end{frame}
+
+\section{Symmetries \& Killing Fields}
+\begin{frame}{Example: Symmetries \& Isometries}
+	\footnotesize
+	\begin{definition}[Group]
+		A \emph{group} is a set $G$ with a binary operation $\circ$ that satisfies the following properties:
+		\begin{itemize}
+			\item \textbf{Closure:} For all $a, b \in G$, $a \circ b \in G$.
+			\item \textbf{Associativity:} For all $a, b, c \in G$, $(a \circ b) \circ c = a \circ (b \circ c)$.
+			\item \textbf{Identity:} There exists an element $e \in G$ such that for all $a \in G$, $e \circ a = a \circ e = a$.
+			\item \textbf{Inverse:} For each element $a \in G$, there exists an element $a^{-1} \in G$ such that $a \circ a^{-1} = e$.
+		\end{itemize}
+	\end{definition}
+
+	\begin{itemize}[<+->]
+		\item \textbf{Euclidean Group $E(n)$:} The group of all isometries of $\R^n$, including translations and rotations.
+		\item \textbf{Orthogonal Group $O(n)$:} The group of all reflections and rotations in $\R^n$.
+		\item \textbf{Poincaré Group:} The group of all isometries of Minkowski spacetime, including translations and Lorentz transformations.
+		\item \textbf{Killing Vector Fields:} A group of isometries that generate symmetries of the metric. 
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Killing Vector Fields}
+	\footnotesize
+	\begin{definition}[Killing Vector Field]
+		A \emph{Killing vector field} is a vector field $K^\mu$ on a manifold $\mathcal{M}$ that satisfies the Killing equation:
+		\[
+			\nabla_\mu K_\nu + \nabla_\nu K_\mu = 0
+		\]
+		where $\nabla_\mu K_\nu = \pdv{K_\nu}{x^\mu} + \Gamma_{\mu\nu}^\lambda K_\lambda$ is the covariant derivative of the vector field.
+	\end{definition}
+	\vspace{1ex}
+	\pause 
+	\begin{itemize}[<+->]
+		\item Killing vector fields generate symmetries of the metric, preserving distances and angles.
+		\item Easiest way to find Killing vector fields is to look for symmetries of the metric, (i.e. the coordinates that the metric is independent of).
+		\item The number of independent Killing vector fields is related to the number of symmetries of the manifold.
+	\end{itemize}
+\end{frame}
+
+% 7. Schwarzschild Geodesics
+\section{Black Hole Geodesics}
+\begin{frame}{Schwarzschild Metric}
+  The Schwarzschild solution describes the geometry of spacetime around a non-rotating, spherically symmetric mass:
+  \[ds^2=-(1-2GM/r)dt^2+(1-2GM/r)^{-1}dr^2+r^2(d\theta^2 + \sin^2\theta\,d\phi^2),\]
+  \begin{itemize}[<+->]
+    \item The Schwarzschild radius $r_s = 2GM$ marks the event horizon of a black hole
+    \item Time-translation symmetry $\to$ Killing vector $\partial_t$ $\to$ conserved energy $E$
+    \item Rotational symmetry $\to$ Killing vector $\partial_\phi$ $\to$ conserved angular momentum $L$
+    \item These symmetries significantly simplify the geodesic equations
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Effective Potential}
+  Using the conserved quantities, the geodesic motion can be reduced to a one-dimensional problem:
+  \[ \tfrac12\dot{r}^2 + V_{\rm eff}(r)=\tfrac12E^2, \]
+  \[ V_{\rm eff}(r)=(1-2GM/r)\left(\frac{L^2}{r^2}+\epsilon\right). \]
+  \begin{itemize}[<+->]
+    \item $\epsilon=0$ for massless particles (null geodesics, e.g., light)
+    \item $\epsilon=1$ for massive particles (timelike geodesics, e.g., spacecraft)
+    \item The effective potential combines gravitational effects and the centrifugal barrier
+    \item The shape of $V_{\rm eff}(r)$ determines possible orbital trajectories:
+      \begin{itemize}
+        \item Bound orbits: $E^2 < V_{\rm eff}(r \to \infty)$
+        \item Unbound orbits: $E^2 > V_{\rm eff}(r \to \infty)$
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Circular Orbits \& Photon Sphere}
+  Circular orbits occur at the extrema of the effective potential, where $dV_{\rm eff}/dr=0$:
+  \begin{itemize}[<+->]
+    \item For null geodesics (light), there exists a unique unstable circular orbit at $r=3GM$
+    \item This special radius defines the \emph{photon sphere}, where light can orbit the black hole
+    \item For timelike geodesics (massive particles):
+      \begin{itemize}
+        \item The innermost stable circular orbit (ISCO) is at $r=6GM$
+        \item Circular orbits at $r<6GM$ are unstable
+        \item Circular orbits at $r>6GM$ are stable
+      </itemize>
+    \item These special orbits are critical for understanding accretion disks and gravitational lensing around black holes
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\end{document}
