@@ -17,6 +17,8 @@
 \usepackage{pgfplots}
 \usepackage{enumitem}
 \usepackage{xcolor}
+\usepackage[english]{babel}
+\usepackage[autostyle]{csquotes}
 
 \pgfplotsset{compat=1.18}
 
@@ -36,35 +38,6 @@
 \newcommand{\F}{\mathbb{F}}
 
 
-% Define global parameters and common drawing commands:
-\pgfmathsetmacro{\dominio}{2.0}    % Height of the cylinder
-\pgfmathsetmacro{\radio}{1}        % Radius of the cylinder
-\pgfmathsetmacro{\step}{\dominio/70.0}
-
-% Macro to draw the common 3D coordinate axes.
-\newcommand{\drawAxes}{
-  \draw[thick,->] (0,0,0) -- (0,2,0) node[above] {$z$};
-  \draw[thick,->] (0,0,0) -- (1.8,0,0) node[right] {$x$};
-  \draw[thick,->] (0,0,0) -- (-1.8,0,0) node[left] {$-x$};
-  \draw[thick,->] (0,0,0) -- (0,0,2) node[above] {$-y$};
-  \draw[thick,->] (0,0,0) -- (0,0,-2) node[below] {$y$};
-}
-
-% Macro to draw the cylinder using circular slices along the z-axis.
-\newcommand{\drawCylinder}{
-  \foreach \z in {0,\step,...,\dominio} {
-    \draw[cyan,very thick,opacity=0.35]
-	  plot[domain=0:360,smooth,variable=\t]
-	  ({\radio*cos(\t)}, {\z}, {\radio*sin(\t)});
-  }
-}
-
-\newcommand{\drawsphere}{
-	\shade[ball color = cyan!40, opacity = 0.65] (0,0) circle (1.5cm);
-	\draw (0,0) circle (1.5cm);
-}
-
-
 \tdplotsetmaincoords{60}{130}     % your camera
 \tdplotsetrotatedcoords{35}{-45}{0}  % so that the plane is z'=0
 
@@ -75,7 +48,7 @@
 \newtheorem{corollary}[definition]{Corollary}
 
 \geometry{margin=1in}
-\title{Geodesics, Symmetries, and Isometries:\\A Comprehensive Study and Applications}
+\title{A look at Geodesics through the lens of symmetries and its applications to Black Holes}
 \author{Ulizes Raudales}
 \date{\today}
 
@@ -87,33 +60,71 @@
 \newpage
 
 \begin{abstract}
-	This thesis develops a unified framework for geodesic analysis on smooth surfaces in \(\R^3\) and in the Schwarzschild spacetime, showing how continuous symmetries give rise to conserved quantities via Killing vector fields and Noether’s theorem.  
-	We derive the general geodesic equations, specialize to surfaces of revolution to obtain Clairaut’s relation with concrete examples, and present practical methods for identifying and exploiting isometries.  
-	Applying these techniques to the Schwarzschild metric, we obtain the effective potential for null and time-like geodesics and characterize circular orbits and the photon sphere.
+	This thesis presents a coherent framework for the analysis of geodesics both on smooth two-dimensional surfaces in \(\R^3\) and in the Schwarzschild spacetime of a black hole.
+	Beginning with the derivation of the geodesic equations, we show how continuous isometries give rise to first integrals via Killing vector fields.  
+	Specializing to surfaces of revolution, we recover Clairaut's relation and illustrate its use on different surfaces, including the torus and the hyperboloid
+	We then apply the same symmetry-based methods to the Schwarzschild metric, deriving the effective potential for null and time-like geodesics, locating circular orbits, and identifying the photon sphere.  
+	Throughout, the unified emphasis on symmetry yields both conceptual clarity and practical computational shortcuts.
 \end{abstract}
 
 \section{Introduction}
-Geodesics—curves that locally minimize distance or more accurate, the "straightest" line in a curved surface, play a fundamental role in both theoretical and applied contexts.  
-On the Earth’s surface, they describe great‐circle routes used in air and sea navigation, enabling efficient path planning across long distances.  
-In computer graphics and mesh processing, geodesic computations underpin texture mapping, shape interpolation, and shortest‐path queries on complex surfaces.  
-In robotics, geodesic algorithms guide motion planning over uneven terrains and within configuration spaces to avoid obstacles while minimizing energy or time.
 
-Beyond these engineering applications, geodesics are central to our understanding of gravity in Einstein’s theory of general relativity.  
-Free‐falling particles and light rays follow spacetime geodesics, so that phenomena such as gravitational lensing, perihelion precession, and black‐hole photon spheres can be analyzed through purely geometric methods.  
-This deep connection between curvature and motion has inspired techniques ranging from GPS corrections in satellite orbits to simulations of cosmological structure formation.
+In many applications—ranging from navigation on the Earth’s surface to path planning in computer graphics and robotics—we seek the “straightest” or shortest route between two points on a curved surface.  
+In the flat plane, these are ordinary straight lines; on a curved surface, they become \emph{geodesics}, which locally minimize distance while remaining intrinsic to the surface.
 
-Motivated by this wide-ranging importance, the present thesis develops a systematic framework for deriving and solving geodesic equations on smooth surfaces in \(\R^3\) and on the Schwarzschild spacetime.  
-By identifying continuous symmetries and their associated Killing vector fields, we obtain conserved quantities that greatly simplify both theoretical analysis and numerical implementation.  The methods presented here provide a unified toolkit for applications in geodesy, graphics, robotics, and gravitational physics.
+Finding geodesics by solving the full system of second‐order differential equations can be algebraically intensive.  
+However, when a surface admits continuous symmetries, one can exploit those isometries to obtain conserved quantities that greatly simplify the problem.  
+In this thesis, we develop a unified, symmetry‐based approach to geodesic analysis.
+
+After reviewing the necessary tools from differential geometry (Section 1), we derive the general geodesic equations on an arbitrary surface (Section 2).  
+Section 3 specializes to surfaces of revolution, where Clairaut’s relation emerges as a consequence of rotational symmetry.  
+In Section 4, we introduce Killing vector fields and Noether’s theorem to explain how each continuous symmetry produces a conserved quantity.  
+Finally, in Section 5, we apply these methods to the Schwarzschild spacetime—deriving the effective potential for time‐like and null geodesics, locating circular orbits, and characterizing the photon sphere.
 
 \section{Background and Preliminaries}
 
-Differential geometry is a branch of mathematics that uses the techniques of calculus and algebra to study problems in geometry. 
-It is a field that has applications in many areas, including physics, engineering, and computer science.
-In this section, we will introduce some of the basic concepts and tools that will be used throughout this thesis. 
+Differential geometry combines the tools of calculus and algebra to study geometric structures, with applications in physics, engineering, and computer science. 
+In this section, we introduce the basic concepts and tools that will appear throughout this thesis.
+
+\medskip
+\noindent
+First, we define the central object of study.
+
+\begin{definition}[Manifold]\label{def:manifold}
+A \emph{manifold} $M$ is a smooth $n$-dimensional topological space that locally ressembles $\mathbb{R}^n$.
+\end{definition}
+
+Intuitively, manifolds generalize curves and surfaces to arbitrary dimensions. They possess several key features:
+\begin{itemize}
+  \item \textbf{Metric Spaces: } Manifolds are smoothly varying metric spaces, meaning they have a well-defined notion of distance and angle.
+  \item \textbf{Differentiable Structure.} Manifolds have a differentiable structure, allowing us to define smooth functions, tangent vectors, and derivatives.
+\end{itemize}
+
+\medskip
+\noindent
+Next, we introduce the mappings that preserve the manifold structure.
+
+\begin{definition}[Diffeomorphism]\label{def:diffeomorphism}
+A map $\varphi\colon M \to N$ between smooth manifolds is a \emph{diffeomorphism} if it is bijective, smooth, and its inverse $\varphi^{-1}$ is also smooth. 
+If such a map exists, $M$ and $N$ are said to be \emph{diffeomorphic}. 
+A diffeomorphism from $M$ to itself is called a \emph{self‑diffeomorphism}.
+\end{definition}
+
+\medskip
+\noindent
+Finally, we remark on \emph{tensors}, mathematical objects that generalize vectors and matrices to arbitrary dimensions and are used to describe geometric and physical quantities in a coordinate-independent manner.
+Although tensors are fundamental in differential geometry, their full development lies beyond the scope of this thesis, so we will introduce them only when needed.
+
+A quick note on notation: 
+\begin{itemize}
+	\item We use latin letter subscripts to denote derivatives with respect to the corresponding coordinate.
+	\item We use Newton's notation for derivatives with respect to time, i.e., $\dot{q} = \frac{dq}{dt}$.
+	\item We use greek letters to denote the coordinates of the manifold and for the components of tensors.
+	\item Is convention to use the Einstein summation convention, where repeated indices are summed over. However, we will not use this convention in this thesis to avoid confusion.
+\end{itemize}
 
 \subsection{Surfaces in \texorpdfstring{$\mathbb{R}^3$}{R3}}\label{sec:surface-def}
 
-In differential geometry, an $n$-dimensional \emph{manifold} is a topological space that is locally resembles $\mathbb{R}^n$, n-dimensional Euclidean space. 
 We will focus on \emph{surfaces}, which are 2-dimensional manifolds embedded, i.e., smoothly and continuously mapped, in $\mathbb{R}^3$.
 The embedding in $\mathbb{R}^3$ endows the surface with additional geometric structure (coming from the ambient Euclidean geometry) that allows us to measure distances, angles, and curvature.
 
@@ -151,7 +162,6 @@ We have that the unit normal vector $\mathbf{U}$ to the surface at point $p$ is 
 which is a unit vector orthogonal to the tangent plane at point $p$.
 
 \subsection{The Metric on a Surface}
-A property of surfaces is that they are metric spaces, meaning that they come with a metric that allows us to measure distances and angles.
 The \emph{metric}, which is a smoothly varying inner product on the tangent plane at each point allows us to measure lengths of curves, angles between tangent vectors, and surface areas. 
 For an embedded surface with local coordinates $(u,v)$, the metric (also called the \emph{first fundamental form}) can be obtained by restricting the Euclidean dot product to the tangent plane:
 \[
@@ -178,16 +188,16 @@ ds^{2} \;=\; \begin{bmatrix}
 \end{bmatrix} \begin{bmatrix}
 	du\\[1ex]
 	dv
-\end{bmatrix} \cdot \begin{bmatrix}
+\end{bmatrix} \begin{bmatrix}
 	du\\[1ex]
 	dv
-\end{bmatrix} \;=\; E\,du^{2} + 2F\,du\,dv + G\,dv^{2}.
+\end{bmatrix}^{\top} \;=\; E\,du^{2} + 2F\,du\,dv + G\,dv^{2}.
 \end{equation}
 This is the \emph{line element} of the surface, which describes how distances are measured on the surface.
 
 We find the length of the line element by the following:
 \[
-	L = \int_{a}^{b} \sqrt{ds^{2}} dt
+	L = \int_{a}^{b} \sqrt{ds^{2}} \, dt
 \]
 
 \subsection{Curves on a Surface}
@@ -253,7 +263,7 @@ Under arc length reparametrization, we call $s$ the \emph{arc length parameter} 
 This parameter is usually refered as the \emph{affine parameter} in the context of geodesics, as it is a parameter that preserves the affine structure of the curve.
 Affine parameters are exactly those parameters for which the geodesic equation has no extra “forcing” term.
 
-\subsection{Curvature of curves}
+\subsection{Curvature}
 The curvature of a curve is a measure of how much the curve deviates from being a straight line.
 In Euclidean space, the curvature of a curve is defined as the rate of change of the tangent vector with respect to the arc length parameter.
 
@@ -277,7 +287,7 @@ The normal curvature is a measure of how much the curve bends in the direction o
 
 
 \section{Geodesics}
-% When working on surfaces, we want to find the "straightest" paths between two points on the surface, which are usually the shortest paths.
+% When working on surfaces, we want to find the \enquote{straightest} paths between two points on the surface, which are usually the shortest paths.
 % In Euclidean space, the straightest path between two points is a straight line.
 % However, on a curved surface, the shortest path may not be a straight line in the Euclidean sense.
 
@@ -287,16 +297,20 @@ Which is defined as
 	\kappa_{g} = \kappa_{\gamma} - \kappa_{\mathbf{N}}.
 \end{equation}
 
-A geodesic can also be thought as the shortest path between two points on a surface.
-However, this is not always the case, as shown in \cite{jia2024geodesics} and will be discussed in more detail once we explore geodesics on different surfaces.
+This provides a measure of how much the curve deviates from being a straight line on the surface.
 
 \begin{definition}[Geodesic]\label{def:geodesic}
-	A curve $\gamma(t)$ on a surface $\mathcal{S}$ or any manifold $\mathcal{M}$ is called a \emph{geodesic} if it is the "straightest" path between two points on the surface.
+	A curve $\gamma(t)$ on a surface $\mathcal{S}$ or any manifold $\mathcal{M}$ is called a \emph{geodesic} if it is the \enquote{straightest} path between two points on the surface.
 	More formally, a curve is a geodesic if it has zero geodesic curvature:
 	\[
-	\kappa_{g} = 0.
+		\kappa_{g} = 0.
 	\]
 \end{definition}
+Intuitively, one can think of a geodesic as a path for which one can travel in a straight line without having to turn or change direction.
+Essentially, a geodesic is a curve that is "straight" in the sense that it does not curve away from the surface.
+
+A geodesic can also be thought as the shortest path between two points on a surface.
+However, this is not always the case, as shown in \cite{jia2024geodesics} and will be discussed in more detail once we explore geodesics on different surfaces.
 
 \subsection{Deriving the Geodesic Equation}
 
@@ -346,16 +360,16 @@ G_{u} \; &=\; 2\,\mathbf{r}_{vu}\cdot \mathbf{r}_{v} \quad &\quad G_{v} \; &=\; 
 \end{alignat*}
 Substituting these relationships into the equations (\ref{eq:geodesic-acc-decomp-1}) and (\ref{eq:geodesic-acc-decomp-2}) gives us the following two equations:
 \begin{equation}\label{eq:geodesic-uv}
-	\ddot{u} + \frac{E_{u}}{2E}\dot{u}^{2} + 2\frac{E_{v}}{2E}\dot{u}\dot{v} - \frac{G_{u}}{2E}\dot{v}^{2} = 0
+	\ddot{u} + \frac{E_{u}}{2E}\dot{u}^{2} + \frac{E_{v}}{E}\dot{u}\dot{v} - \frac{G_{u}}{2E}\dot{v}^{2} = 0
 \end{equation}
 \begin{equation}\label{eq:geodesic-vu}
-	\ddot{v} - \frac{E_{v}}{2G}\dot{u}^{2} + 2\frac{G_{u}}{2G}\dot{u}\dot{v} + \frac{G_{v}}{2G}\dot{v}^{2} = 0
+	\ddot{v} - \frac{E_{v}}{2G}\dot{u}^{2} + \frac{G_{u}}{G}\dot{u}\dot{v} + \frac{G_{v}}{2G}\dot{v}^{2} = 0
 \end{equation}
 
 These two equations are the geodesic equations for the coordinates \(u\) and \(v\) on the surface.
 These equations correspond to the case where $F = 0$, as the equations are independent of the cross term $F$.
 For our look at surfaces of revolution, we have that $F = 0$, as the surface is symmetric about the axis of rotation.
-Hence, these are the geodesic equations we will be using for the rest of this thesis.
+
 
 In the case where $F \neq 0$, we can write the geodesic equations in a more general form:
 \begin{equation}\label{eq:geodesic-compact}
@@ -363,7 +377,27 @@ In the case where $F \neq 0$, we can write the geodesic equations in a more gene
 \end{equation}
 where $n$ is the number of coordinates on the surface, and $q^\sigma$ are the coordinates on the surface.
 $\Gamma_{\mu\nu}^\sigma$ are the \emph{Christoffel symbols} of the second kind, which describe how the metric changes as we move along the surface.
-In our case of equations (\ref{eq:geodesic-uv}) and (\ref{eq:geodesic-vu}), we have
+The \emph{Christoffel symbols} are defined as:
+\[
+	\Gamma_{\mu\nu}^\sigma = \frac{1}{2}\sum_{\lambda=1}^{n}g^{\sigma\lambda}\left(\pdv{g_{\mu\nu}}{q^\lambda} + \pdv{g_{\nu\lambda}}{q^\mu} - \pdv{g_{\mu\lambda}}{q^\nu}\right)
+\]
+It tells us how much the rate of change in the $\mu$-th coordinate depends on the $\nu$-th coordinate as we move along the $\sigma$-th coordinate.
+On Surfaces, the Christoffel symbols can be computed to be:
+\[
+\begin{aligned}
+	\Gamma_{uu}^{u} &= \frac{1}{2(EG - F^{2})}\bigg[ G E_{u} - F (2F_{u} + E_{v}) \bigg] &\qquad \Gamma_{uv}^{u} &= \Gamma_{vu}^{u} = \frac{1}{2(EG - F^{2})}\bigg[ G E_{v} - F G_{u} \bigg] \\
+	\Gamma_{vv}^{u} &= \frac{1}{2(EG - F^{2})}\bigg[ G (2F_{v} - G_{u}) - F G_{v} \bigg] &\qquad \Gamma_{uu}^{v} &= \frac{1}{2(EG - F^{2})}\bigg[ E (2F_{u} - E_{v}) - F E_{u} \bigg] \\
+	\Gamma_{uv}^{v} &= \Gamma_{vu}^{v} = \frac{1}{2(EG - F^{2})}\bigg[ E G_{u} - F E_{v} \bigg] &\qquad \Gamma_{vv}^{v} &= \frac{1}{2(EG - F^{2})}\bigg[ E G_{v} - F (2F_{v} + G_{u}) \bigg] \\
+\end{aligned}
+\]
+The geodesic equations for a surface $\mathcal{S}$ are given by:
+\[
+	\ddot{u} + \Gamma_{uu}^{u}\dot{u}^{2} + 2\Gamma_{uv}^{u}\dot{u}\dot{v} + \Gamma_{vv}^{u}\dot{v}^{2} = 0
+\]
+\[
+	\ddot{v} + \Gamma_{uu}^{v}\dot{u}^{2} + 2\Gamma_{uv}^{v}\dot{u}\dot{v} + \Gamma_{vv}^{v}\dot{v}^{2} = 0
+\]
+In our case of equations (\ref{eq:geodesic-uv}) and (\ref{eq:geodesic-vu}), we have $F = 0$, so the Christoffel symbols simplify to:
 \[
 \begin{aligned}
     \Gamma_{11}^{1} &= \frac{E_{u}}{2E} &\quad \Gamma_{12}^{1} &= \Gamma_{21}^{1} = \frac{E_{v}}{2E} &\quad \Gamma_{22}^{1} &= -\frac{G_{u}}{2E} \\[4mm]
@@ -371,9 +405,7 @@ In our case of equations (\ref{eq:geodesic-uv}) and (\ref{eq:geodesic-vu}), we h
 \end{aligned}
 \]
 
-\section{Geodesics on Surfaces}
-
-\subsection{Geodesics on Surfaces of Revolution}
+\section{Geodesics on Surfaces of Revolution}
 
 Surfaces of revolution are a class of surfaces obtained by rotating a planar curve about an axis in the plane. 
 They are highly symmetric surfaces, exhibiting rotational symmetry.
@@ -502,9 +534,7 @@ We then have the following must hold for a unit speed curve:
 \end{equation}
 This means that the geodesic equations are not independent of the unit speed condition, and thus we must solve them simultaneously.
 
-\begingroup 
-\color{blue}
-\subsection{General Geodesics}\label{sec:general-geodesics}
+\subsection{Meridian and Parallel Geodesics}
 We can extrapolate some general geodesics in surfaces of revolution by keeping one of the coordinates constant.
 With this, we will find two types of geodesics: the \emph{meridian geodesic} and the \emph{parallel geodesic}.
 
@@ -528,13 +558,11 @@ Substituting this into the \eqref{eq:geodesic-v-arc} gives us:
 Because of the unit speed condition, we have that \(\dot{v} = 1 \) and by equation \eqref{eq:unit-speed-condition}, we have that $x(u)\dot{u} = 1$, thus $x \neq 0$.
 Therefore, at $u_0$, we have that $x_{u} = 0$. 
 This means that parallels are only geodesics if $u_0$ is a critical point of the profile curve, i.e., $x_{u}(u_0) = 0$.
-\endgroup
 
-\subsubsection{Clairaut’s Relation and Parametrization}
+\subsection{Clairaut's Relation and Parametrization}
 
 Equations \eqref{eq:geodesic-u} and \eqref{eq:geodesic-v} can be difficult to solve directly.
 However, we can use a special property of surfaces of revolution to simplify the problem.
-We will come to see that geodesics have a conserved quantity along the geodesic.
 
 We begin by solving equation (\ref{eq:geodesic-v-arc}) for \(v\):
 \[
@@ -575,6 +603,9 @@ R\sin\phi = C
 \end{theorem}
 Here, \(R\) is the distance from the axis of revolution, \(\phi\) is the angle between the $\dot{\gamma}$ and the tangent vector to the geodesic, and \(C\) is a constant.
 
+In later sections, we see this relation arise as a consequence of the symmetry of the surface of revolution and conserved quantities along the geodesic.
+
+Another important property of surfaces of revolution is that they can be parametrized in two different ways: \(u\)-Clairaut and \(v\)-Clairaut parametrizations.
 We say a Surface $\mathcal{S}$ is $v$-Clairaut parametrized if $E_{u} = G_{u} = 0$ and $u$-Clairaut parametrized if $E_{v} = G_{v} = 0$.
 Thus the geodesic equations for each Clairaut parametrization are given by
 \begin{align}
@@ -630,10 +661,7 @@ This results in the following geodesic solution:
 	u = \pm \int \frac{c\sqrt{G}}{\sqrt{E}\sqrt{E - c^{2}}} \dd{v}
 \end{equation}
 
-
-\subsection{Geodesics on different surfaces}
-
-\subsubsection{The Cylinder}
+\subsection{The Cylinder}
 We begin by looking at a simple case of a surface of revolution, the cylinder.
 The cylinder denoted topologically by \(S^1 \times \mathbb{R}\) is a surface generated by rotating a line about the \(z\)-axis.
 The parametric representation of the cylinder is given by
@@ -705,7 +733,7 @@ If \(b \neq 0\), we have a helical geodesic that wraps around the cylinder as it
 	\label{fig:geodesics-on-cylinder}
 \end{figure}
   
-\subsubsection{The Sphere}
+\subsection{The Sphere}
 
 We now consider the case of a sphere, which is a special case of a surface of revolution.
 The sphere is a surface of revolution obtained by rotating a circle about an axis.
@@ -758,12 +786,12 @@ So the geodesics on the sphere are great circles. Figure (\ref{fig:geodesics-on-
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.4\textwidth]{images/sphere_circle_plane.png}
+	\includegraphics[width=0.4\textwidth]{images/output.png}
 	\caption{Geodesics on a Sphere}
 	\label{fig:geodesics-on-sphere}
 \end{figure}
 
-\subsubsection{The Hyperboloid}
+\subsection{The Hyperboloid}
 
 Now we consider the case of a hyperboloid, which is a bit more complex to study than the sphere.
 The hyperboloid is a surface of revolution obtained by rotating a hyperbola about an axis.
@@ -811,7 +839,40 @@ As shown in \cite{khuangsatung2012geodesics}, by assuming that $u$ is very small
 \end{itemize}
 
 
-\subsubsection{The Torus}
+\begin{figure}[ht]
+	\centering
+	%------------------------------
+	% Subfigure 1: Vertical Line on the Cylinder
+	\begin{subfigure}[b]{0.4\linewidth}
+	  \centering
+	  \includegraphics[width=1.0\textwidth]{images/h_merd1.png}
+ 	  \caption{Meridian: case $C=0$}
+	  \label{subfig:vertical}
+	\end{subfigure}
+	\hfill
+	%------------------------------
+	% Subfigure 2: Helix on the Cylinder
+	\begin{subfigure}[b]{0.4\linewidth}
+	  \centering
+	  \includegraphics[width=1.0\textwidth]{images/h_circ1.png}
+	  \caption{Parallel: case $C=a$}
+	  \label{subfig:helix}
+	\end{subfigure}
+	\hfill
+	%------------------------------
+	% Subfigure 3: Horizontal Circle on the Cylinder
+	\begin{subfigure}[b]{0.4\linewidth}
+	  \centering
+	  \includegraphics[width=1.0\textwidth]{images/hyperboloid1.png}
+	  \caption{Helical case $C \neq 0$}
+	  \label{subfig:circle}
+	\end{subfigure}
+	%------------------------------
+	\caption{Geodesics on a Cylinder}
+	\label{fig:geodesics-on-cylinder}
+\end{figure}
+
+\subsection{The Torus}
 
 The torus is a surface of revolution obtained by rotating a circle about an axis that is not in the plane of the circle.
 The parametric representation of the torus is given by
@@ -833,17 +894,27 @@ Taking the derivatives of the components of the metric tensor, we find
     E_u = 0, \quad E_v = 0, \quad G_u = -2(R + r \cos (u))r \sin (u), \quad G_v = 0.
 \]
 
-Thus, the torus is a $u$-Clairaut parametrization.
-So the geodesic equations for the torus are given by
+It follows that the only nonzero Christoffel symbols are
+\[
+  \Gamma^u_{vv}
+    =-\frac{G_u}{2E}
+    =\frac{(R+r\cos u)\sin u}{r},
+  \qquad
+  \Gamma^v_{uv}
+    =\Gamma^v_{vu}
+    =\frac{G_u}{2G}
+    =-\frac{r\sin u}{R+r\cos u}.
+\]
+Accordingly, the geodesic equations (with respect to arc length \(s\)) become
 \begin{align*}
-    \ddot{u} + \frac{(R + r \cos (u))r \sin (u)}{r^2}\,\dot{u}^2 - \frac{(R + r \cos (u))^2}{r^2}\,\dot{v}^{2} &= 0 \\
-    \ddot{v} + \frac{r \sin (u)}{R + r \cos (u)}\,\dot{u}\dot{v} &= 0
+  \ddot u + \frac{(R+r\cos u)\sin u}{r}\,\dot v^2 &= 0,\\
+  \ddot v - \frac{2r\sin u}{R+r\cos u}\,\dot u\,\dot v &= 0,
 \end{align*}
 
 Using Clairaut's relation, we can simplify the geodesic equations.
 Using Eq \eqref{eq:v_Clairaut_integral}, we get
 \[
-    v = \pm \int \frac{cr}{(R + r \cos (u))\sqrt{(R + r \cos (u))^2 - c^2}}\,\dd{u}
+  v = v_0\pm\int \frac{C\,r}{(R+r\cos u)\,\sqrt{(R+r\cos u)^2 - C^2}} \,du.
 \]
 We can use Clairaut's relation to analyze the geodesics on the torus.
 \[
@@ -852,21 +923,58 @@ We can use Clairaut's relation to analyze the geodesics on the torus.
 By assuming that $u$ is very small number, therefore we will consider into 3 cases:
 
 \begin{itemize}
-    \item If $C = 0$, then $\phi = 0$ and the geodesic corresponds to a meridian on the torus.
-    \item If $C = R + r$ at $u = u_0 = 0$, then $\phi = \frac{\pi}{2}$ and the geodesic a parallel on the torus.
-    \item If $\abs{C} < \abs{R + r}$, then $\phi$ is a constant angle and the geodesic is a helix on the torus.
-    % \item If $\abs{C} > \abs{R + r}$, then the geodesic is a closed curve on the torus.
+  \item \(C=0\).  Then \(\sin\phi=0\), so \(\dot v=0\):  these are the meridians \(v=\mathrm{const}\).
+  \item \(\lvert C\rvert=R+r\) (attained at \(u=0\)).  Then \(\sin\phi=1\):  the outer parallel \(u=0\).
+  \item \(\lvert C\rvert=\lvert R-r\rvert\) (attained at \(u=\pi\)).  Then \(\sin\phi=1\):  the inner parallel \(u=\pi\).
+  \item \(0<\lvert C\rvert<R-r\).  Geodesics wind unboundedly, crossing both the inner and outer parallels.
+  \item \(R-r<\lvert C\rvert<R+r\).  Geodesics oscillate between the two “barrier” parallels given by \(R+r\cos u=\pm C\).
 \end{itemize}
+
+\begin{figure}[ht]
+	\centering
+	%------------------------------
+	% Subfigure 1: Vertical Line on the Cylinder
+	\begin{subfigure}[b]{0.4\linewidth}
+	  \centering
+	  \includegraphics[width=1.0\textwidth]{images/torus_merd.png}
+ 	  \caption{Meridian: case $C=0$}
+	  \label{subfig:vertical}
+	\end{subfigure}
+	\hfill
+	%------------------------------
+	% Subfigure 2: Helix on the Cylinder
+	\begin{subfigure}[b]{0.4\linewidth}
+	  \centering
+	  \includegraphics[width=1.0\textwidth]{images/torus_par.png}
+	  \caption{Parallel: case $C=R+r$}
+	  \label{subfig:helix}
+	\end{subfigure}
+	\hfill
+	%------------------------------
+	% Subfigure 3: Horizontal Circle on the Cylinder
+	\begin{subfigure}[b]{0.4\linewidth}
+	  \centering
+	  \includegraphics[width=1.0\textwidth]{images/torus_ub1.png}
+	  \caption{Unbounded: case $C \in (0, R-r)$}
+	  \label{subfig:circle}
+	\end{subfigure}
+	%------------------------------
+	\caption{Geodesics on a Cylinder}
+	\label{fig:geodesics-on-cylinder}
+\end{figure}
 
 \section{Symmetries, Isometries, and Killing Vector Fields}
 
-Understanding the symmetries of a surface not only deepens our insight into its intrinsic geometry but also plays a crucial role in simplifying the computation of geodesics. 
-In this section, we review the algebraic framework of continuous symmetries—embodied in the notion of a group—and then explain how these symmetries manifest as isometries on a surface. 
-% Finally, we introduce Killing vector fields as the infinitesimal generators of continuous isometries, and we discuss how they lead to conserved quantities along geodesics.
+To be able to simplify the process of finding geodesics, we can leverage the existing symmetries inherent to a manifold.
+In this section, we review the algebraic framework of continuous symmetries—embodied in the notion of a group—and then explain how these symmetries manifest as isometries through the use of Killing vector fields. 
+
+Symmetries are transformations that leave the geometric structure of an object unchanged.
+For example, consider a square. The symmetries of the square include rotations by \(0^\circ\), \(90^\circ\), \(180^\circ\), and \(270^\circ\), as well as reflections across its diagonals and midlines.
+These transformations can be combined in various ways, such as performing a rotation followed by a reflection.
 
 \subsection{Groups and Continuous Symmetries}
-Symmetries of a geometric object naturally form a mathematical structure called a \emph{group}. 
-Informally, a group is a collection of operations (such as rotations, translations, or reflections) that can be combined (via composition) while preserving the object’s essential properties. 
+When working with a set of symmetries, it is often useful to organize them into a mathematical structure called a \emph{group}.
+Informally, a group is a collection of operations (such as rotations, translations, or reflections) that can be combined (via composition) while preserving the object's essential properties. 
 More formally, we recall the following definition.
 
 \begin{definition}[Group]
@@ -879,39 +987,31 @@ More formally, we recall the following definition.
 	\end{enumerate}
 \end{definition}
 
-Examples of groups include the set of integers under addition, the set of non-zero real numbers under multiplication, and the set of rotations in three-dimensional space.
+A interesting group is the \emph{Lie group}, which is a group that is also a smooth manifold.
+This means that the topological structure of the group is compatible with the smooth structure of the manifold.
+An example of a Lie group is the group of rotations in $n$-dimensional space, denoted by $SO(n)$ called the \emph{Special Orthogonal group}.
+The elements of this group are orthogonal matrices with determinant 1, and the group operation is matrix multiplication.
+The Special Orthogonal group $SO(n)$ is isomorphic (i.e., structurally identical) to the $n-1$-dimensional sphere $S^{n-1}$.
+This is helpful when describing the symmetries of a manifold such as surfaces of revolution.
+Lie groups are important in physics and mathematics because they provide a framework for understanding continuous symmetries.
 
+Let us look at the group of symmetries associated with the surfaces of revolution we have seen so far.
+\begin{itemize}
+	\item \textbf{Cylinder:} Since the cylinder is topologically given by $S^1 \times \mathbb{R}$, the symmetry group is the direct product of the circle group $SO(2)$ and the translation group $\mathbb{R}$, which corresponds to the rotations about the $z$-axis and translations along the $z$-axis.
+	\item \textbf{Sphere:} Because the sphere is topologically given by $S^2$, the symmetry group is the rotation group $SO(3)$, which corresponds to the rotations about any axis in three-dimensional space.
+	\item \textbf{Hyperboloid:} Since hyperboloids describe Minkowski spacetime (which models the universe), the symmetry group is the Lorentz group $SO(1,2)$, which corresponds to the rotations and boosts in Minkowski spacetime.
+	\item \textbf{Torus:} The torus is topologically given by $S^1 \times S^1$, and the symmetry group is the direct product of two circle groups $SO(2) \times SO(2)$, which corresponds to the rotations about the $z$-axis and the rotation about the $x$-axis.
+\end{itemize}
 
-A manifold, such as a surface $\mathcal{S}$, possesses a symmetry if there exists a diffeomorphism (a smooth, invertible map) $\phi: \mathcal{S} \to \mathcal{S}$ from the manifold to itself that preserves the geometric structure.
+A manifold, such as a surface $\mathcal{S}$, possesses a symmetry if there exists a diffeomorphism $\phi: \mathcal{S} \to \mathcal{S}$ from the manifold to itself that preserves the geometric structure.
 This means that the metric tensor $g$ remains invariant under the transformation:
 \[
 	\phi \circ g = g,
 \]
 The set of all such diffeomorphisms forms a group, called the \emph{symmetry group} of the manifold.
 
-% \subsubsection{Lie Groups}
-% A Lie group is a group that is also a smooth manifold, so its operations are smooth. For example, 
-% the rotation group $SO(3)$, $SL(2,\mathbb{R})$, and the Poincaré group are Lie groups. 
-% Their associated Lie algebras—tangent spaces at the identity—capture the infinitesimal generators of the group.
-
-\subsubsection{Generators of a Group}
-Another important concept is the idea of generators of a group.
-A generator of a group is an element that can be used to produce all other elements of the group through repeated application of the group operation.
-
-\begin{definition}[Generator]
-	Let $G$ be a group. An element $g \in G$ is called a \emph{generator} of the group if every element of $G$ can be expressed as a power of $g$, i.e., for every $h \in G$, there exists an integer $n$ such that $h = g^n$.
-	\[
-		G = \langle g \rangle = \{ g^n \mid n \in \R \}
-	\]
-\end{definition}
-
-
-In the context of continuous symmetries, we can think of a generator as an infinitesimal transformation that generates a one-parameter group of transformations.
-For example, the rotation group in three-dimensional space can be generated by a single rotation about a fixed axis.
-The generators of a group can be thought of as the "building blocks" of the group, and they play a crucial role in understanding the structure and properties of the group.
-
-
 \subsection{Isometries on Surfaces}
+Now we look at specific types of symmetries that preserve the metric structure of a surface called \emph{isometries}.
 Given a surface $\mathcal{S}$ with a metric $g$, an \emph{isometry} is a transformation that preserves distances. More precisely, a bijective map
 \[
 f: S \to S
@@ -921,14 +1021,12 @@ is an \emph{isometry} if, for all points $p,q\in S$, the distance between $p$ an
 d\big(f(p),f(q)\big)=d(p,q).
 \]
 This invariance implies that the local expressions for the metric coefficients remain unchanged under the transformation. 
-For example, on a round sphere the full isometry group is the orthogonal group $O(3)$, while for the Euclidean plane both rotations and translations are isometries.
-
-It is important to note that isometries preserve geodesics; if $\gamma$ is a geodesic on $S$, then so is $f\circ\gamma$. 
-This property will be key when we introduce the infinitesimal generators of continuous isometries.
-
+One thing to note is that all isometries are symmetries, but not all symmetries are isometries.
+For example, consider the rotation of a circle about its center. This transformation preserves the distances between points on the circle, and thus it is an isometry.
+However, a shear transformation that distorts the circle into an ellipse does not preserve distances and is not an isometry.
 
 \subsection{Killing Vector Fields}
-A Killing vector field is a vector field on a manifold that generates an isometry of the metric.
+A Killing vector field (named after the mathematician Wilhelm Killing) is a vector field on a manifold that generates an isometry of the metric.
 
 \begin{definition}[Killing Vector Field]
 	Let \(M\) be a manifold with metric \(g\). A vector field \(K\) on \(M\) is called a \emph{Killing vector field} if the Lie derivative of the metric with respect to \(K\) vanishes:
@@ -945,99 +1043,83 @@ Where \(\nabla\) is the covariant derivative associated with the metric \(g\).
 We wont go into details of what the Lie derivative is, but it is a way to measure how a tensor field changes along the flow of a vector field.
 For more details, see \cite{oprea2007differential},\cite{note32020covariant},\cite{atkins2018solving},\cite{carrol2019spacetime}.
 
-
-Easiest way to find a Killing vector field is to look for symmetries of the metric.
-That is, we want to find the coordinates of which the metric is independent off and thus the metric is invariant under the transformation of such coordinates.
-
-For example, let us consider the following metric:
-\[
-	ds^{2} = dr^{2} + r^{2}d\theta^{2} 
-\]
-This metric is independent of the coordinate \(\theta\), so we can find a Killing vector corresponding to the isometry generated by rotations about the axis of revolution.
-The Killing vector field is given by
-\[
-	\xi^{1} = \frac{\partial}{\partial \theta} = \begin{bmatrix} 0 \\ 1 \end{bmatrix}
-\]
-This vector field generates a rotation about the axis of revolution, and it is a Killing vector field because it preserves the metric.
-In general, a Killing vector field is a vector field that generates an isometry of the metric.
-
+For the purposes of this thesis, we not be using the Lie derivative definition to find the Killing vector field, but rather we will be finding them by looking for the coordintates of which the metric is independent off.
 
 As shown in \cite{carrol2019spacetime} and \cite{atkins2018solving}, if $K^{\mu}$ is a Killing vector field, then we have the following to holds
 \begin{equation}\label{eq:Killing_vector}
-	\text{const} = g_{\mu\nu}K^{\mu}\dv{x^{\nu}}{t} 
+	\text{const} = g_{\mu\nu}K^{\mu}\dv{x^{\nu}}{\lambda} 
 \end{equation}
+
 Additionally, we have another constant for the motion along the geodesic, which is given by
 \begin{equation}\label{eq:epsilon_equation}
-	\epsilon = - \sum_{\mu,\nu} g_{\mu\nu}\dv{x^{\mu}}{t}\dv{x^{\nu}}{t}
+	\epsilon = - \sum_{\mu,\nu} g_{\mu\nu}\dv{x^{\mu}}{\lambda}\dv{x^{\nu}}{\lambda}
 \end{equation}
 In the context of general relativity, this equation describes the motion of a test particle in a gravitational field where \(\epsilon = 0\) for null geodesics, \(\epsilon = 1\) for time-like geodesics, and \(\epsilon = -1\) for space-like geodesics.
 
 \subsection{Clairaut's Relation from Killing Vector Fields}
 
+We now will show how to derive Clairaut's relation from the conservation law associated with a Killing vector field.
 Consider a surface of revolution obtained by rotating a profile curve around an axis, with local coordinates $(u,v)$ so that the induced metric reads
 $$
 ds^2 \;=\; du^2 \;+\; f(u)^2\,dv^2\,,
 $$
 where $f(u)$ is the distance from the axis.
 
-Because the metric coefficients do not depend on $v$, the vector field
+Because the metric coefficients do not depend on $v$, the angular coordinate, we thus have that rotations about the axis are isometries of the metric.
+We then have the following Killing vector field:
+\begin{align*}
+	K^{2} &= \begin{bmatrix} 0 \\ 1 \end{bmatrix} \\
+\end{align*}
 
-$$
-K = \frac{\partial}{\partial v}
-$$
+Using equation \eqref{eq:Killing_vector}, we find the following conserved quantity $L$ along the geodesic:
+\begin{align*}
+	L &= g_{22} K^{2} \dv{x^{2}}{s} \\
+	&= f(u)^2 \dv{v}{s} \\
+	&= \text{const}
+\end{align*}
 
-is Killing (it generates rotations about the axis).
+Going back to the unit speed condition for a curve in a surface of revolution, we have
+\begin{align*}
+	1 &= \left(\dv{u}{s}\right)^2 + f(u)^2 \left(\dv{v}{s}\right)^2 \\
+\end{align*}
 
-Applying the general conservation law $g(K,\dot x)=\text{const}$ gives
+Using the trigonometric identity \( \sin^2(\phi) + \cos^2(\phi) = 1 \), we can rewrite the unit speed condition as
+\[
+	\sin^2(\phi) + \cos^2(\phi) = \left(\dv{u}{s}\right)^2 + f(u)^2 \left(\dv{v}{s}\right)^2
+\]
+Where we have
+\[
+	\cos(\phi) = \dv{u}{s} \qquad \sin(\phi) = f(u)\dv{v}{s}
+\]
 
-$$
-g\bigl(\dot x,\partial_v\bigr)
-= f(u)^2\,\frac{dv}{d\lambda}
-= L,
-$$
-where $L$ is the conserved “angular momentum.”
+We can thus clearly see that the constant \(L\) is given by
+\[
+	L = f(u) \sin(\phi)
+\]
+Thus we have derived Clairaut's relation from the conservation law associated with the Killing vector field.
 
-For a unit-speed geodesic one has
+One can show that from just using equation \eqref{eq:Killing_vector} we can find the geodesics of a surface without the need of the geodesics equations.
+Due to the inherent symmetries of the surface, we can find the geodesics by looking for the coordinates of which the metric is independent off and finding the Killing vector field associated with that symmetry.
+Then we can use the conservation law associated with the Killing vector field to find the geodesics.
+This is a powerful technique that can be used to find the geodesics of a surface without the need to solve the geodesic equations directly.
 
-$$
-\underbrace{\Bigl(\frac{du}{d\lambda}\Bigr)^2}_{=\,(\cos\psi)^2}
-\;+\;
-\underbrace{f(u)^2\Bigl(\frac{dv}{d\lambda}\Bigr)^2}_{=\,(\sin\psi)^2}
-=1,
-$$
-
-so we define the angle $\psi$ between the geodesic and a meridian by
-
-$$
-\cos\psi = \frac{du}{d\lambda},
-\qquad
-\sin\psi = f(u)\,\frac{dv}{d\lambda}.
-$$
-
-Hence
-$$
-f(u)\,\sin\psi
-= f(u)\;f(u)\,\frac{dv}{d\lambda}
-= L,
-$$
 
 \subsection{Noether's Theorem}
-Noether's theorem reveals that every continuous symmetry of the action leads to a conserved quantity. 
-In a system described by a Lagrangian \( \mathcal{L} \), if the action is invariant under a continuous transformation, then there exists a corresponding conserved current.
-
+We will connect the conserved quantities associated with the Killing vector fields to Noether's theorem.
+In the context of classical mechanics, Noether's theorem provides a profound connection between symmetries and conservation laws.
+\begin{theorem}[Noether's Theorem]
+	For every continuous symmetry in a physical system, there exists a conservation law.
+	So given a diffeomorphism \( \phi: M \to M \) that leaves the action invariant, there exists a conserved quantity associated with the symmetry.
+\end{theorem}
 For instance, consider the following standard symmetries:
 \begin{itemize}
     \item Invariance under time translations implies conservation of energy.
     \item Invariance under spatial translations implies conservation of linear momentum.
     \item Invariance under rotations implies conservation of angular momentum.
 \end{itemize}
-
-In the study of geodesics, if the metric (or Lagrangian) remains invariant under a continuous transformation generated by a Killing vector field \( K \), then the quantity
-\[
-    g_{\mu\nu}K^{\mu}\frac{dx^{\nu}}{d\lambda}
-\]
-remains constant along the geodesic (with \( \lambda \) as an affine parameter). 
-This conserved quantity is fundamental in reducing and solving the geodesic equations, as seen in Clairaut's relation for surfaces of revolution, where the projection of the tangent vector onto the symmetry direction is preserved.
+We see that when studying physical systems, we can use Noether's theorem to find conserved quantities associated with symmetries.
+In the context of general relativity, we can use Noether's theorem to find conserved quantities associated with the symmetries of the spacetime geometry.
+In particular, we can use Noether's theorem to find the conserved quantities associated with the Killing vector fields of the spacetime geometry.
 
 \section{A look to Black Holes Geodesics}
 
@@ -1052,8 +1134,10 @@ d\Omega^2 = d\theta^2 + \sin^2(\theta) d\phi^2
 \] 
 is the metric on the unit sphere, \(G\) is the gravitational constant, \(M\) is the mass of the black hole, and \(c = 1\) is the speed of light under natural units.
 The Schwarzschild metric is a solution to the Einstein field equations in general relativity and describes the spacetime geometry around a non-rotating, spherically symmetric black hole.
+The metric describes the $4$-dimensional spacetime geometry, where \(t\) is the time coordinate, \(r\) is the radial coordinate, \(\theta\) is the polar angle, and \(\phi\) is the azimuthal angle.
 
-Because the Schwarzschild metric is a spherically symmetric solution, we can choose to study the geodesics in the equatorial plane, where \(\theta = \frac{\pi}{2}\).
+Because the Schwarzschild metric is a spherically symmetric solution, we can choose to study the geodesics in the equatorial plane, where \(\theta = \frac{\pi}{2}\), since regardless of the value of \(\theta\), the geodesics will be the same due to the rotational symmetry of the spacetime.
+This means that we can set \(\theta = \frac{\pi}{2}\) and \(d\theta = 0\) in the metric.
 This simplifies the metric to
 \begin{equation}\label{eq:schwarzschild_metric_equatorial}
 	ds^2 = -\left(1 - \frac{2GM}{r}\right) dt^2 + \left(1 - \frac{2GM}{r}\right)^{-1} dr^2 + r^2 d\phi^2
@@ -1133,13 +1217,13 @@ Multiplying by $r_{c}^{4}/2$, we get
 In Newtonian gravity, only massive objects feel the gravitational attraction of other masses, so massless particles like photons travel along straight lines in a flat spacetime described by the Minkowski metric \cite{carrol2019spacetime}.  
 By contrast, in general relativity gravity is encoded as curvature of spacetime around a mass, and light rays follow this curvature.  
 Because photons trajectories are not affected by the mass of the object they are passing by, and thus must follow straight lines in the curved spacetime, we can use the geodesic equations to describe their motion.
-These light‐ray trajectories are called \emph{null geodesics}, characterized by \ref{eq:epsilon_equation} with \(\epsilon = 0\).
+These light-ray trajectories are called \emph{null geodesics}, characterized by \ref{eq:epsilon_equation} with \(\epsilon = 0\).
 
 For circular null orbits in the Schwarzschild metric, we set \(\epsilon=0\) in equation \ref{eq:dV_eff} gives
 \[
 0 \;=\; -\,L^{2}\,r_{c} \;+\; 3\,G\,M\,L^{2},
 \]
-where \(L\) is the photon’s conserved angular momentum per unit energy.  
+where \(L\) is the photon's conserved angular momentum per unit energy.  
 Solving for \(r_{c}\) yields
 \[
 r_{c} \;=\; 3\,G\,M.
@@ -1170,10 +1254,26 @@ The unstable solution is given by
 \]
 The stable solution corresponds to a circular orbit that is stable under small perturbations, while the unstable solution corresponds to a circular orbit that is unstable under small perturbations.
 
+\begin{figure}
+	\centering
+	\includegraphics[width=0.5\textwidth]{images/bh_geo.png}
+	\caption{Geodesics in the Schwarzschild metric.}
+	\label{fig:bh_geo}
+\end{figure}
+
 % \color{black}
 \section{Conclusion}
 
-\section{References}
+We have shown that a symmetry-centered approach unifies the study of geodesics across classical and relativistic settings.  
+By deriving conserved quantities from Killing vector fields, one bypasses the full geodesic equations and reduces the problem to solving first-order integrals.  
+On surfaces of revolution, this yields Clairaut’s relation and a clear classification of meridians, parallels, helices, and oscillatory trajectories. 
+In the Schwarzschild spacetime, the same machinery produces the effective potential, circular orbits, and the photon sphere in a few lines.
+
+\medskip\noindent\textbf{Future work.}  
+The \emph{fundamental group} \(\pi_{1}(M)\) is the set of all loops in \(M\) based at a point \(x_{0}\), where two loops are considered the same if one can be continuously deformed into the other.  
+We multiply two classes \([\gamma_{1}]\) and \([\gamma_{2}]\) by tracing \(\gamma_{1}\) then \(\gamma_{2}\).  
+
+Comparing \(\pi_{1}(M)\) with the isometry group can tell us which loop-classes admit closed geodesics and how the surface’s symmetries affect their shape and stability.
 
 \nocite{*}
 \bibliographystyle{unsrt}
